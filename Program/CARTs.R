@@ -18,8 +18,8 @@ tree.iris <- rpart(
 
 png(
   filename = "results/iris_tree.png",
-  width = 1200,
-  height = 800,
+  width = 1000,
+  height = 1000,
   res = 150
 )
 
@@ -29,10 +29,22 @@ rpart.plot(
   extra = 104,
   fallen.leaves = TRUE,
   box.palette = "YlGnBl",
-  shadow.col = "gray"
+  shadow.col = "gray",
+  nn = TRUE
 )
 
 dev.off()
+
+# Predict a new observation
+new.obs <- data.frame(
+  Sepal.Length = 5.1,
+  Sepal.Width = 3.5,
+  Petal.Length = 2.8,
+  Petal.Width = 0.2
+)
+
+predict(tree.iris, newdata = new.obs, type = "class")
+predict(tree.iris, newdata = new.obs, type = "prob")
 
 ## Regression tree --------------------
 head(mtcars)
@@ -42,10 +54,18 @@ tree.mtcars <- rpart(
   data = mtcars
 )
 
+png(
+  filename = "results/mtcars_tree.png",
+  width = 1200,
+  height = 800,
+  res = 150
+)
 rpart.plot(
   tree.mtcars,
   type = 2,
   fallen.leaves = TRUE,
   box.palette = "Greens",
-  shadow.col = "gray"
+  shadow.col = "gray",
+  nn = TRUE
 )
+dev.off()

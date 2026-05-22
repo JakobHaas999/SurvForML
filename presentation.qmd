@@ -1,0 +1,96 @@
+---
+title: |
+  <span style="font-size: 1.0em;">Survival Trees and Random Survival Forests</span>
+subtitle: |
+  <div style="font-size: 0.8em; line-height: 1.6; text-align: center;">
+  Jakob Haas <br>
+  **Supervisor:** Dr. Andreas Bender <br>
+  </div>
+date: "2026-06-05"
+format:
+  revealjs:
+    css: customstyle.css
+    slide-number: c
+    center: false
+editor: source
+---
+
+```{r setup, include=FALSE}
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+source("setup.R")
+```
+
+## Motivation
+
+
+
+
+## Tables of Content
+
+1.  Introdution
+
+2.  From CART to Survival Tree
+
+3.  From Survival Tree to Random Survival Forest
+
+4.  Evaluation
+
+5.  Comparison with Cox Regression
+
+6.  Conclusion
+
+
+
+## CART: Construction
+
+:::: {.columns}
+
+::: {.column width = "45%"}
+![](results/iris_tree.png){width=100%}
+:::
+
+::: {.column width = "55%"}
+
+**How CART works**
+
+1.  Start with a root node that contains all the data
+
+2.  Search for the feature $x_p$ and split that minimizes the empirical risk in the child nodes
+
+3.  Repeat recursively for each node
+
+4.  Stop when a stopping criterion is reached
+:::
+
+::::
+
+## CART: Prediction
+
+
+
+:::: {.columns}
+
+::: {.column width = "45%"}
+![](results/iris_tree.png){width=100%}
+:::
+
+
+::: {.column width = "55%"}
+**New Observation**
+<div class="small-table">
+```{r}
+knitr::kable(data.frame(
+  Feature = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+  Value = c(5.1, 3.5, 2.8, 0.2)
+))
+```
+</div>
+:::
+::::
+
+$\Rightarrow$ Prediction $$
+
+
+
+
+

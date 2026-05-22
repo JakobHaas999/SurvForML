@@ -27,3 +27,9 @@ for (p in packages) {
   checkInstalled(p)
   suppressPackageStartupMessages(library(p, character.only = TRUE))
 }
+
+# Remove variables that are not needed anymore
+rm(p, packages, checkInstalled)
+
+# Source relevant files
+source("Program/Functions.R")
