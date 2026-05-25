@@ -8,7 +8,12 @@ packages <- c(
   "survival",
   "mlr3",
   "rpart",
-  "rpart.plot"
+  "rpart.plot",
+  "data.table",
+  "ggplot2",
+  "survminer",
+  "gt",
+  "DiagrammeR"
 )
 
 # Function that checks if a package is installed and installs it if not

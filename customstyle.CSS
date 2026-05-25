@@ -2,6 +2,10 @@
 
 /*-- scss:rules --*/
 
+.reveal {
+  font-size: 32px;
+}
+
 .author {
   text-align: right;
 }
@@ -73,3 +77,5 @@
   padding: 0.25em 0.5em;
 
 }
+
+

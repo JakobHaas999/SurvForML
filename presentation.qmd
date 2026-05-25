@@ -10,9 +10,15 @@ date: "2026-06-05"
 format:
   revealjs:
     css: customstyle.css
+    title-slide-attributes: 
+      data-background-image: ./results/Titelfolie.png
+      data-visibility: hidden
     slide-number: c
     center: false
 editor: source
+bibliography: references.bib
+filters: 
+  - pseudocode
 ---
 
 ```{r setup, include=FALSE}
@@ -20,12 +26,28 @@ options(repos = c(CRAN = "https://cran.rstudio.com"))
 source("setup.R")
 ```
 
+## {.visibility-hidden}
+
+![](results/Titelfolie.png)
+
 ## Motivation
 
+- We have discussed various classical statistical approaches for handling time-to-event or survival data
+
+::: {.fragment}
+
+![](results/ml_pipeline.png){length=90%}
+
+:::
+
+::: {.fragment}
+- We now want to adapt the machine learning workflow to survival data
+- We will especially focus on tree-based methods
+::: 
 
 
 
-## Tables of Content
+## Outline
 
 1.  Introdution
 
@@ -59,7 +81,9 @@ source("setup.R")
 
 3.  Repeat recursively for each node
 
-4.  Stop when a stopping criterion is reached
+4.  Stop when a stopping criterion is reached. The nodes where the algorithm stops are called terminal nodes.
+
+
 :::
 
 ::::
@@ -76,21 +100,266 @@ source("setup.R")
 
 
 ::: {.column width = "55%"}
-**New Observation**
-<div class="small-table">
+**New Observation:**
 ```{r}
-knitr::kable(data.frame(
-  Feature = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+new.observation <- data.frame(
+  Feature = c("Sepal Length", "Sepal Width", "Petal Length", "Petal Width"),
   Value = c(5.1, 3.5, 2.8, 0.2)
-))
+)
+
+new.observation|>
+  gt() |>
+  cols_label(
+    Feature = "Feature",
+    Value = "Observed Value"
+  ) |>
+  fmt_number(
+    columns = Value,
+    decimals = 1
+  ) |>
+  tab_options(
+    table.font.size = px(18),
+    column_labels.font.weight = "bold",
+    table.width = pct(90),
+    data_row.padding = px(5)
+  )
 ```
-</div>
+
+::: {.fragment}
+
+$\Rightarrow$ Hard-Label Prediction: $\widehat{Y} = \text{versicolor}$   
+$\Rightarrow$ Probabilities: 
+$$
+\widehat{P}[\text{species} = \text{setosa}] = 0.00
+$$
+$$
+\widehat{P}[\text{species} = \text{versicolor}] = 0.91
+$$
+$$
+\widehat{P}[\text{species} = \text{virginica}] = 0.09
+$$
+::: 
 :::
 ::::
 
-$\Rightarrow$ Prediction $$
 
 
+
+## From CART to Survival Forest
+
+- Now we want to apply this idea to survival data
+- Recap: What is survival data?
+$$
+(T_i, \delta_i, \mathbf{x}_i)
+$$
+where
+- $T_i$ is the observed time for individual $i$
+- $\mathbf{x}_i$ is the corresponding covariate vector
+- $\delta_i$ is the event indicator:
+$$
+\delta_i =
+\begin{cases}
+1, & \text{if the event is observed,} \\
+0, & \text{if the observation is censored.}
+\end{cases}
+$$
+
+## From CART to Survival Tree
+
+- A first natural approach would be to fit a regression tree with the observed times $T_i$ as target variable
+- Why does this not work?
+- For survival data, the response is not fully observed due to censoring
+- The regession tree would handle the response as if the event occured at      $T_i$ which is not the case for censoring
+- Image we have for example: 
+    - $(T_1,\delta_1)=(100,1), \qquad (T_2,\delta_2)=(100,0)$ 
+    
+    - Then we have $T_1 = T_2 = 100$, but $T_1^\ast = 100,\; T_2^\ast > 100$.   
+
+$\Rightarrow$ Survival trees therefore require censoring-aware split criteria
+
+
+
+
+## Survival Trees: Log-rank Splitting
+
+- A split at node $h$ on a feature $x$ is always of the form $x \leq c$ and $x > c$
+- So as a result we get two new sets of data (child nodes).
+- A good split maximizes the differences of survival probabilities ($S(t)$) between the two sets
+- Notation:
+    - $t_1 < t_2 < ... < t_N$: distinct event times in parent node $h$
+    - $d_{j, g}$: number of events at time $j$ in child node $g \in \{1, 2\}$
+    - $d_j = d_{j ,1} + d_{j, 2}$: number of events at time $j$
+    - $n_{j, g}$: risk-set at time j in child node $g \in \{1, 2\}$
+    - $n_j = n_{j, 1} + n_{j, 2}$: number of events at time $j$
+
+    
+## Survival Trees: Log-rank Splitting
+- Remember the log-rank statistic:
+$$
+L(x, c) = \frac{\sum_{j =1}^{N} \left(d_{j, 1} - n_{j ,1} \frac{d_j}{n_j}\right)}{\sqrt{\sum_{j=1}^{N} \frac{n_{j, 1}}{n_j} \left(1 - \frac{n_{j, 1}}{n_j}\right)
+\left(\frac{n_j - d_j}{n_j - 1}\right) d_j}}
+=
+\frac{\sum_{j = 1}^{N} (d_{j, 1} - E[d_{j, 1}])}{Var[d_{j, 1}]}
+$$
+
+:::{.fragment}
+- High values of $|L(x, c)|$ provide evidene againt $H_0$: Both groups have equal survival functions
+- Hence, our goal is to maximize $|L(x, c)|$ $\Rightarrow$ we want to have a huge survival differnce between the resulting child nodes
+- Formally find $x^\ast$ and $c^\ast$ such that
+$$
+|L(x^\ast, c^\ast)| \geq |L(x, c)| \quad \forall x, c
+$$ 
+:::
+
+## Example: Log-rank splitting
+- We take the **tumor** data from the $\{\textit{pammtools}\}$ package with $n_{obs} = 776$:
+```{r}
+data("tumor", package = "pammtools")
+tumor <- as.data.table(tumor)
+tumor <- tumor[, .(days, status, sex, transfusion, age)]
+tumor |>
+  head(3) |>
+  gt() |>
+  tab_options(
+    table.align = "center",
+    table.font.size = px(16),
+    data_row.padding = px(4)
+  )
+```
+:::{.fragment}
+- We consider the two binary features **sex** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
+:::
+:::{.fragment}
+![](results/logrank_splits_tumor.png){width=100%, length=100%}
+:::
+
+
+
+
+## Example: Log-rank splitting
+
+- Now we also take the numeric feature **age** into account
+- Now we have to consider $m_{\text{age}} - 1$ split points, where $m_{\text{age}}$ is the number of unique values of **age**
+- Now, we loop through every possible split point
+- For every split point $c$ we get:
+$$
+z_1 = \{x_i \mid  x_i \leq c\} \quad \text{and} \quad z_2 = \{x_i \mid x_i > c\}
+$$
+- Then we calculate the log-rank statistic between the two
+- **Ich bin nicht glücklich**
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+## Survival Trees: Prediction Targets
+- Instead of predicting $t \mid \mathbf x$ we want to predict survival properties
+    1. Survival function with the Kaplan-Meier estimator [@kaplan1958nonparametric]
+$$
+\widehat{S}_h(t) = \prod_{j: t_{j, h} \leq t} \left(1 - \frac{d_{j, h}}{n_{j, h}}\right)
+$$
+    2. Cummulative Hazard function with the Nelson-Aalen estimator:
+$$
+\widehat{H}_h(t) = \sum_{j: t_{j, h} \leq t} \frac{d_{j, h}}{n_{j, h}}
+$$
+
+- We assume that all observations in the terminal nodes have the same $\widehat{S}_h(t)/\widehat{H}_h(t)$
+
+
+## From Survival Trees to Random Survival Forests
+
+- A single survival tree is interpretable, but often unstable:
+  small changes in the training data can lead to substantially different tree structures
+- This instability results in high variance and may reduce predictive performance
+
+::: {.fragment}
+- **Random Survival Forests** [@ishwaran2008random] address this issue by combining many randomized survival trees
+- Randomization is introduced through:
+  - bootstrap sampling of the training data for each tree
+  - random selection of candidate features at each split $mtry$)
+
+$$
+\text{Random Survival Forest} =
+\text{Bagging}
++
+\text{Random Feature Selection}
++
+\text{Survival Trees}
+$$
+:::
+
+
+## Algorithm
+- Inputs:
+    - $\mathbb{D}_{\text{train}}$: Training-data with target $y$ and $P$ features
+    - $B:$ Number of Trees
+    - $mtry \leq P:$ Number of features that are considered at each split
+    - $d_0 \geq 0:$ Minimum number events in each node
+    
+::: {.fragment}
+1. Draw $B$ bootstrap samples from the data. Each sample contains around $67 \%$ of the data. The other $33\%$ are called out-of-bag-data (OOB-data)
+2. Grow a survival tree with each of the $B$ samples. At each split consider $mtry$ random features for your split. Grow the tree under the condition that each node must have $d_0 \geq 0$ events
+3. Calculate the Cumulative Hazard Function (CHF) for each tree. Then average over all $B$ CHFs to obtain the ensemble prediction
+
+:::
+
+
+## Aggregation of Survival Predictions
+Now we want to make predictions with our tree ensemble:    
+
+- Imagine we have a new observation $\widetilde{x}$  
+- We push $\widetilde{x}$ down the $B$ trees    
+- For every tree we obtain a prediction for the Cumulative Hazard Function $H_{b}(t \mid  \widetilde{x})$
+- Then we average over all trees to obtain our ensemble prediction:
+$$
+\widehat{H} (t \mid \widetilde{x}) = \frac{1}{B} \sum_{b = 1}^{B} H_{b}(t \mid  \widetilde{x})
+$$
+
+## OOB-data
+- Remember in each tree we 
+
+
+
+## Example: Random Survival Forest
+
+
+
+
+
+## Variable Importance
+- In a random forest we have the opprtunity to do variable selection
+- We can do this by calculating the variable importance
+- This can be done by using the following algorithm:
+
+## Example: Random Survival Forest
+    - 
+
+
+## Evaluation: Concordance Index
+
+
+## Evaluation: Brier Score
+
+
+## Out-of-Bag Evaluation
+
+
+
+## Comparison with Cox-Regression
+
+
+## Sources
 
 
 
