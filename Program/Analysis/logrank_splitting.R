@@ -7,7 +7,7 @@ data("tumor", package = "pammtools")
 tumor <- as.data.table(tumor)
 head(tumor)
 # Select relevant columns
-tumor <- tumor[, .(days, status, sex, transfusion, age)]
+tumor <- tumor[, .(days, status, complications, transfusion, age)]
 
 
 ### Part 1: Only binary features

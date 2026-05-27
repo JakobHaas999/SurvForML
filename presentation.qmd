@@ -30,7 +30,7 @@ source("setup.R")
 
 ![](results/Titelfolie.png)
 
-## Motivation
+## Introduction
 
 - We have discussed various classical statistical approaches for handling time-to-event or survival data
 
@@ -42,24 +42,21 @@ source("setup.R")
 
 ::: {.fragment}
 - We now want to adapt the machine learning workflow to survival data
-- We will especially focus on tree-based methods
 ::: 
 
 
 
 ## Outline
 
-1.  Introdution
+1.  From CART to Survival Tree
 
-2.  From CART to Survival Tree
+2.  From Survival Tree to Random Survival Forest
 
-3.  From Survival Tree to Random Survival Forest
+3.  Evaluation
 
-4.  Evaluation
+4.  Benchmark
 
-5.  Comparison with Cox Regression
-
-6.  Conclusion
+5.  Conclusion
 
 
 
@@ -145,7 +142,7 @@ $$
 
 
 
-## From CART to Survival Forest
+## From CART to Survival Tree
 
 - Now we want to apply this idea to survival data
 - Recap: What is survival data?
@@ -188,9 +185,9 @@ $\Rightarrow$ Survival trees therefore require censoring-aware split criteria
 - Notation:
     - $t_1 < t_2 < ... < t_N$: distinct event times in parent node $h$
     - $d_{j, g}$: number of events at time $j$ in child node $g \in \{1, 2\}$
-    - $d_j = d_{j ,1} + d_{j, 2}$: number of events at time $j$
-    - $n_{j, g}$: risk-set at time j in child node $g \in \{1, 2\}$
-    - $n_j = n_{j, 1} + n_{j, 2}$: number of events at time $j$
+    - $d_j = d_{j ,1} + d_{j, 2}$
+    - $n_{j, g}$: number at risk immediately before $t_j$ in child node $g$
+    - $n_j = n_{j, 1} + n_{j, 2}$
 
     
 ## Survival Trees: Log-rank Splitting
@@ -199,7 +196,7 @@ $$
 L(x, c) = \frac{\sum_{j =1}^{N} \left(d_{j, 1} - n_{j ,1} \frac{d_j}{n_j}\right)}{\sqrt{\sum_{j=1}^{N} \frac{n_{j, 1}}{n_j} \left(1 - \frac{n_{j, 1}}{n_j}\right)
 \left(\frac{n_j - d_j}{n_j - 1}\right) d_j}}
 =
-\frac{\sum_{j = 1}^{N} (d_{j, 1} - E[d_{j, 1}])}{Var[d_{j, 1}]}
+\frac{\sum_{j = 1}^{N} (d_{j, 1} - E[d_{j, 1}])}{\sqrt{Var[d_{j, 1}]}}
 $$
 
 :::{.fragment}
@@ -216,7 +213,6 @@ $$
 ```{r}
 data("tumor", package = "pammtools")
 tumor <- as.data.table(tumor)
-tumor <- tumor[, .(days, status, sex, transfusion, age)]
 tumor |>
   head(3) |>
   gt() |>
@@ -227,7 +223,7 @@ tumor |>
   )
 ```
 :::{.fragment}
-- We consider the two binary features **sex** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
+- We consider the two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
 :::
 :::{.fragment}
 ![](results/logrank_splits_tumor.png){width=100%, length=100%}
@@ -275,6 +271,10 @@ $$
 $$
 
 - We assume that all observations in the terminal nodes have the same $\widehat{S}_h(t)/\widehat{H}_h(t)$
+
+## Example: Survival Tree
+- We consider the **tumor** data with features, **age**, **sex**, and **transfusion**
+
 
 
 ## From Survival Trees to Random Survival Forests
@@ -325,38 +325,138 @@ Now we want to make predictions with our tree ensemble:
 $$
 \widehat{H} (t \mid \widetilde{x}) = \frac{1}{B} \sum_{b = 1}^{B} H_{b}(t \mid  \widetilde{x})
 $$
+- To obtain the Survival function we can use the Breslow estimator:
+$$
+\widehat{S}(t \mid \widetilde{x}) = \exp(- \widehat{H} (t \mid \widetilde{x}))
+$$
 
 ## OOB-data
-- Remember in each tree we 
+- Remember in each bootstrap sample we only used $67\%$ of the data to grow the survival tree
+- The remaining $33\%$ are the out-of-bag-data (OOB-data)
 
-
-
-## Example: Random Survival Forest
 
 
 
 
 
 ## Variable Importance
-- In a random forest we have the opprtunity to do variable selection
-- We can do this by calculating the variable importance
-- This can be done by using the following algorithm:
 
-## Example: Random Survival Forest
-    - 
+- Random Survival Forests provide a prediction-based measure of variable
+  importance based on OOB observations.
+- For a variable $x_p$, the Variable Importance (VIMP) is calculated as follows
+  [@ishwaran2008random]:
 
+    1. Obtain the original OOB prediction error of the forest.
+    2. Pass each OOB observation down its corresponding OOB trees.
+       Whenever a split on $x_p$ is encountered, randomly assign the
+       observation to one of the two daughter nodes.
+    3. Compute the prediction error of this perturbed OOB ensemble.
+    4. Define
+
+$$
+    \operatorname{VIMP}(x_p)
+    =
+    \operatorname{Err}_{\mathrm{perturbed}}(x_p)
+    -
+    \operatorname{Err}_{\mathrm{OOB}}.
+$$
+
+
+
+## Variable Importance
+
+- Example: Consider the **tumor** data again
+
+
+![](results/feature_importance_rsf.png)
+
+- How can we interpret that?
 
 ## Evaluation: Concordance Index
 
+- A performance measure for right-censored survival data is Harrell's C-index [@harrell1982evaluating]
+- The C-index measures how often, among comparable pairs, the individual who experiences the event earlier is assigned a higher predicted risk
 
-## Evaluation: Brier Score
+::: {.fragment} 
+- A pair of observations is comparable if:
+    1. Both individuals are uncensored
+    2. One individual experiences the event before the other individual is censored
+
+:::
+
+::: {.fragment}
+- Which pairs are comparable here?
+![](results/graph_c_index.png)
+:::
+
+## Concordance Index Intuition
+![](results/c_index_plot.svg)
+
+- The predicted risk is for example the Cumulative Hazard Function
+
+## Concordance Index Calculation
+The C-index can be calculated through [@ishwaran2008random]:$\widehat{C}=\frac{1}{|P|}\sum_{(i,j)\in P} c_{ij},$ where $P$ is the set of all permissible pairs and
+$$
+c_{ij} =
+\begin{cases}
+1, 
+   & \text{if } T_i < T_j \text{ and } \widehat{r}_i > \widehat{r}_j, \\[4pt]
+0.5, 
+    & \text{if } T_i < T_j \text{ and } \widehat{r}_i = \widehat{r}_j, \\[4pt]
+0, 
+    & \text{if } T_i < T_j \text{ and } \widehat{r}_i < \widehat{r}_j, \\[4pt]
+1, 
+    & \text{if } T_i = T_j,\ \delta_i = \delta_j = 1
+      \text{ and } \widehat{r}_i = \widehat{r}_j, \\[4pt]
+0.5, 
+    & \text{if } T_i = T_j,\ \delta_i = \delta_j = 1
+      \text{ and } \widehat{r}_i \neq \widehat{r}_j, \\[4pt]
+1, 
+    & \text{if } T_i = T_j,\ \delta_i = 1,\ \delta_j = 0
+      \text{ and } \widehat{r}_i > \widehat{r}_j, \\[4pt]
+0.5, 
+    & \text{if } T_i = T_j,\ \delta_i = 1,\ \delta_j = 0
+      \text{ and } \widehat{r}_i \leq \widehat{r}_j .
+\end{cases}
+$$
+$\widehat{r}$ is a risk-score, e.g.  the Cumulative Hazard function
 
 
-## Out-of-Bag Evaluation
+## Brier-Score
+- The Brier-Score is a measure for probabilistic outcomes
+- Let $\pi(t) \in [0, 1]$ the predicted probability at t and $c(t) \in \{0, 1\}$ the true value at t. Then the Brier-Score at time $t$ is given by:
+$$
+BS(t) = \frac{1}{N} \sum_{i = 1}^{N} [\pi_i(t) - c_i(t)]^2
+$$
+
+::: {.fragment}
+- This ideas was extended by  @graf1999assessment, such that the Brier-Score can serve as a measure for survival problems with censored informations
+- For calculation we refer to @wang2019machine
+
+:::
+
+## Brier-Score Calculation
+- We reweight the individual contributions to the empirical Brier-Score to take censoring information into account
+- The, we can compute the Score as follows:
+$$
+BS(t) = \frac{1}{N} \sum_{i=1}^{N} w_i(t) [\widehat{S}_i(t) - Y_i(t)]^2,
+$$
+where $Y_i(t) = I [T_i^\ast > t]$ and
+$$
+w_i(t) = \begin{cases}
+\frac{\delta_i}{G(T_i)} & \text{ if} \quad T_i \leq t \\
+\frac{1}{G(T_i)} & \text{ if} \quad T_i > t
+\end{cases}
+$$
+- G is the Kaplan-Meier estimator of the censoring distribution for a dataset $(T_i, 1 - \delta_i, \mathbf x_i)$
 
 
 
 ## Comparison with Cox-Regression
+
+
+## Conclusion
+
 
 
 ## Sources

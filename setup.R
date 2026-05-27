@@ -13,7 +13,16 @@ packages <- c(
   "ggplot2",
   "survminer",
   "gt",
-  "DiagrammeR"
+  "DiagrammeR",
+  "DiagrammeRsvg",
+  "rsvg",
+  "mlr3proba",
+  "mlr3tuning",
+  "randomForestSRC",
+  "paradox",
+  "mlr3extralearners",
+  "future",
+  "progressr"
 )
 
 # Function that checks if a package is installed and installs it if not
