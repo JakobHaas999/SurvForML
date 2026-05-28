@@ -22,7 +22,8 @@ packages <- c(
   "paradox",
   "mlr3extralearners",
   "future",
-  "progressr"
+  "progressr",
+  "mlr3viz"
 )
 
 # Function that checks if a package is installed and installs it if not
@@ -44,6 +45,3 @@ for (p in packages) {
 
 # Remove variables that are not needed anymore
 rm(p, packages, checkInstalled)
-
-# Source relevant files
-source("Program/Functions.R")

@@ -59,23 +59,94 @@
 }
 
 .small-table table {
-
   font-size: 0.65em;
-
   width: auto;
-
   margin-left: auto;
-
   margin-right: auto;
-
 }
-
 .small-table th,
-
 .small-table td {
-
   padding: 0.25em 0.5em;
+}
 
+/* Right-align both benchmark tables on the slide */
+.reveal .benchmark-tables table {
+  margin-left: 0;
+  margin-right: auto;
+}
+/* Optional: make the tables slightly more compact */
+.reveal .benchmark-tables table {
+  font-size: 0.85em;
+  width: auto;
+}
+/* LaTeX-style math rendering */
+.reveal mjx-container,
+.reveal .MathJax {
+  font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", "Times New Roman", serif !important;
+  color: #111827;
+}
+
+/* Inline formulas like $x_i$ */
+.reveal mjx-container[jax="CHTML"]:not([display="true"]) {
+  font-size: 1.03em;
+}
+
+/* Display equations like $$ ... $$ */
+.reveal mjx-container[display="true"] {
+  font-size: 1.18em;
+  margin: 0.75em 0 !important;
+  padding: 0.35em 0.55em;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Optional: subtle equation block background */
+.reveal mjx-container[display="true"] > mjx-math {
+  padding: 0.15em 0.2em;
+}
+
+/* Better spacing inside slides */
+.reveal .slides section {
+  line-height: 1.35;
+}
+
+.reveal p mjx-container,
+.reveal li mjx-container {
+  vertical-align: -0.08em;
+}
+
+/* Display formulas */
+.reveal mjx-container[display="true"] {
+  font-size: 1.08em;
+  margin: 0.65em 0 !important;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Do not distort MathJax tables, especially cases */
+.reveal mjx-mtable {
+  line-height: normal !important;
+}
+
+/* Better spacing for cases/aligned equations */
+.reveal mjx-mtable mjx-mtr {
+  height: auto !important;
+}
+
+.reveal mjx-mtable mjx-mtd {
+  padding-top: 0.12em !important;
+  padding-bottom: 0.12em !important;
+}
+
+/* Keep the cases brace visually balanced */
+.reveal mjx-mo {
+  line-height: normal !important;
 }
 
 
+/* Avoid tiny equation numbers or cramped tags */
+.reveal mjx-mtd[id^="mjx-eqn"] {
+  font-size: 0.85em;
+  color: #6b7280;
+}

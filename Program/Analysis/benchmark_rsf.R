@@ -94,6 +94,24 @@ results <- bmr$aggregate(measures)[
   , .(task_id, learner_id, surv.cindex, surv.graf)
 ]
 results
+# Save file
+saveRDS(results, file = "results/benchmark_results.rds")
 
-mlr3viz::autoplot(bmr, measure = measure.cindex)
-mlr3viz::autoplot(bmr, measure = measure.graf)
+
+p.cindex <- autoplot(bmr, measure = measure.cindex)
+p.graf <- autoplot(bmr, measure = measure.graf)
+# Save plots
+ggsave(
+  filename = "Results/benchmark_cindex.png",
+  plot = p.cindex,
+  width = 8,
+  height = 5,
+  dpi = 300
+)
+ggsave(
+  filename = "Results/benchmark_graf.png",
+  plot = p.graf,
+  width = 8,
+  height = 5,
+  dpi = 300
+)

@@ -10,6 +10,7 @@ date: "2026-06-05"
 format:
   revealjs:
     css: customstyle.css
+    html-math-method: mathjax
     title-slide-attributes: 
       data-background-image: ./results/Titelfolie.png
       data-visibility: hidden
@@ -186,7 +187,7 @@ $\Rightarrow$ Survival trees therefore require censoring-aware split criteria
     - $t_1 < t_2 < ... < t_N$: distinct event times in parent node $h$
     - $d_{j, g}$: number of events at time $j$ in child node $g \in \{1, 2\}$
     - $d_j = d_{j ,1} + d_{j, 2}$
-    - $n_{j, g}$: number at risk immediately before $t_j$ in child node $g$
+    - $n_{j, g}$: number at risk immediately before $t_j$ in child node $g \in \{1, 2\}$
     - $n_j = n_{j, 1} + n_{j, 2}$
 
     
@@ -208,42 +209,19 @@ $$
 $$ 
 :::
 
+
 ## Example: Log-rank splitting
-- We take the **tumor** data from the $\{\textit{pammtools}\}$ package with $n_{obs} = 776$:
-```{r}
-data("tumor", package = "pammtools")
-tumor <- as.data.table(tumor)
-tumor |>
-  head(3) |>
-  gt() |>
-  tab_options(
-    table.align = "center",
-    table.font.size = px(16),
-    data_row.padding = px(4)
-  )
-```
-:::{.fragment}
+
+- We take the **tumor** data from the $\{\textit{pammtools}\}$ package
 - We consider the two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
-:::
-:::{.fragment}
+
+::: {.fragment}
 ![](results/logrank_splits_tumor.png){width=100%, length=100%}
 :::
 
-
-
-
-## Example: Log-rank splitting
-
-- Now we also take the numeric feature **age** into account
-- Now we have to consider $m_{\text{age}} - 1$ split points, where $m_{\text{age}}$ is the number of unique values of **age**
-- Now, we loop through every possible split point
-- For every split point $c$ we get:
-$$
-z_1 = \{x_i \mid  x_i \leq c\} \quad \text{and} \quad z_2 = \{x_i \mid x_i > c\}
-$$
-- Then we calculate the log-rank statistic between the two
-- **Ich bin nicht glücklich**
-
+:::{.fragment}
+- Which split will we choose
+:::
 
 
 
@@ -374,52 +352,70 @@ $$
 
 ## Evaluation: Concordance Index
 
-- A performance measure for right-censored survival data is Harrell's C-index [@harrell1982evaluating]
-- The C-index measures how often, among comparable pairs, the individual who experiences the event earlier is assigned a higher predicted risk
+- Harrell's C-index measures the discriminatory ability of a survival model
+  [@harrell1982evaluating]
+- It evaluates whether observations with earlier observed events have higher predicted risk
 
-::: {.fragment} 
-- A pair of observations is comparable if:
-    1. Both individuals are uncensored
-    2. One individual experiences the event before the other individual is censored
+::: {.fragment}
+**Comparable Pairs**    
+For two observations $i$ and $j$ with $T_i$ < $T_j$, the pair is comparable if $\delta_i = 1$  
+- The earlier observation is an observed event  
+- If observation $i$ is censored before $T_j$, their event ordering is unknown    
+:::
+
+::: {.fragment}
+**Which pairs are comparable?**
+![](results/graph_c_index.png)
+
+:::
+
+## Concordance Index: Intuition
+![](results/c_index_plot.svg)
+
+- The C-index evaluates ranking, not the absolute accuracy of predicted survival probabilities
+
+
+## Concordance Index: Calculation
+
+$$
+\widehat{C}
+=
+\frac{
+|\text{concordant pairs}|
++
+0.5 \cdot | \text{risk ties} |
+}{
+|\text{comparable pairs} |
+}.
+$$
+
+::: {.fragment}
+$$
+\widehat{C} = 1
+\quad \Rightarrow \quad
+\text{perfect risk ranking}
+$$
+$$
+\widehat{C} = 0.5
+\quad \Rightarrow \quad
+\text{ranking comparable to chance}
+$$
 
 :::
 
 ::: {.fragment}
-- Which pairs are comparable here?
-![](results/graph_c_index.png)
+
+**For Random Survival Forests:**  
+- Each patient receives a scalar risk score $\widehat r_i$  
+- A possible RSF risk score is the ensemble mortality derived from the
+  predicted cumulative hazard function  
+$$
+\widehat r_i \uparrow
+\quad \Rightarrow \quad
+\text{higher predicted event risk}
+$$
+
 :::
-
-## Concordance Index Intuition
-![](results/c_index_plot.svg)
-
-- The predicted risk is for example the Cumulative Hazard Function
-
-## Concordance Index Calculation
-The C-index can be calculated through [@ishwaran2008random]:$\widehat{C}=\frac{1}{|P|}\sum_{(i,j)\in P} c_{ij},$ where $P$ is the set of all permissible pairs and
-$$
-c_{ij} =
-\begin{cases}
-1, 
-   & \text{if } T_i < T_j \text{ and } \widehat{r}_i > \widehat{r}_j, \\[4pt]
-0.5, 
-    & \text{if } T_i < T_j \text{ and } \widehat{r}_i = \widehat{r}_j, \\[4pt]
-0, 
-    & \text{if } T_i < T_j \text{ and } \widehat{r}_i < \widehat{r}_j, \\[4pt]
-1, 
-    & \text{if } T_i = T_j,\ \delta_i = \delta_j = 1
-      \text{ and } \widehat{r}_i = \widehat{r}_j, \\[4pt]
-0.5, 
-    & \text{if } T_i = T_j,\ \delta_i = \delta_j = 1
-      \text{ and } \widehat{r}_i \neq \widehat{r}_j, \\[4pt]
-1, 
-    & \text{if } T_i = T_j,\ \delta_i = 1,\ \delta_j = 0
-      \text{ and } \widehat{r}_i > \widehat{r}_j, \\[4pt]
-0.5, 
-    & \text{if } T_i = T_j,\ \delta_i = 1,\ \delta_j = 0
-      \text{ and } \widehat{r}_i \leq \widehat{r}_j .
-\end{cases}
-$$
-$\widehat{r}$ is a risk-score, e.g.  the Cumulative Hazard function
 
 
 ## Brier-Score
@@ -451,8 +447,53 @@ $$
 - G is the Kaplan-Meier estimator of the censoring distribution for a dataset $(T_i, 1 - \delta_i, \mathbf x_i)$
 
 
+## Benchmark: Setup
 
-## Comparison with Cox-Regression
+::: {.benchmark-tables}
+
+- We evaluate survival predictions on two tasks:
+
+| Task | Data set |
+|---|---|---|
+| `Survival::gbsg` | Breast cancer patients |
+| `Pammtools::tumor` | Tumor registry patients |
+
+::: {.fragment}
+
+- We compare four learners:
+
+| Learner | Role |
+| --- | --- |
+| Kaplan-Meier | Non-inforamtive baseline without covariates |
+| Cox regression | Classical statistical semi-parametric approach |
+| Random Survival Forest | Untuned ML method |
+| Tuned Random Survival Forest | ML method with optimized hyperparameters |
+:::
+
+:::
+
+## Benchmark: Setup
+- The tuned RSF is optimized by random search over:
+$$
+\texttt{mtry.ratio} \in [0.1,1],
+\qquad
+\texttt{nodesize} \in \{3,\ldots,50\}.
+$$
+
+- Inner resampling: 3-fold cross-validation
+- Outer evaluation: repeated 5-fold cross-validation with 3 repetitions
+- Evaluation metrics:
+  - C-index
+  - Integrated Brier Score
+  
+## Benchmark: Results C-Index
+![](results/benchmark_cindex.png){width = 100%}
+
+## Benchmark: Integrated Brier Score
+![](results/benchmark_graf.png){width = 100%}
+
+
+
 
 
 ## Conclusion
@@ -460,6 +501,7 @@ $$
 
 
 ## Sources
+
 
 
 
