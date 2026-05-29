@@ -27,7 +27,7 @@ digraph pipeline {
     penwidth = 1.5,
     arrowsize = 0.8
   ]
-  D     [label = 'Data  D']
+  D     [label = 'Data']
   Train [label = 'Training Data']
   Test  [label = 'Test Data']
   Model [label = 'Model']

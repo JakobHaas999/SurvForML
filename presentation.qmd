@@ -33,16 +33,16 @@ source("setup.R")
 
 ## Introduction
 
-- We have discussed various classical statistical approaches for handling time-to-event or survival data
+- We have discussed various classical statistical approaches for handling survival data
 
 ::: {.fragment}
 
-![](results/ml_pipeline.png){length=90%}
+![](results/ml_pipeline.png){width=90%}
 
 :::
 
 ::: {.fragment}
-- We now want to adapt the machine learning workflow to survival data
+- We now extend the machine learning workflow to survival data.
 ::: 
 
 
@@ -75,11 +75,11 @@ source("setup.R")
 
 1.  Start with a root node that contains all the data
 
-2.  Search for the feature $x_p$ and split that minimizes the empirical risk in the child nodes
+2.  Search for the feature $x_p$ and split point $c$ that minimize the empirical risk in the resulting child nodes
 
 3.  Repeat recursively for each node
 
-4.  Stop when a stopping criterion is reached. The nodes where the algorithm stops are called terminal nodes.
+4.  Stop when a stopping criterion is reached. Nodes that are no longer split are terminal nodes.
 
 
 :::
@@ -125,17 +125,11 @@ new.observation|>
 
 ::: {.fragment}
 
-$\Rightarrow$ Hard-Label Prediction: $\widehat{Y} = \text{versicolor}$   
-$\Rightarrow$ Probabilities: 
+$\Rightarrow$ Hard-Label Prediction: 
 $$
-\widehat{P}[\text{species} = \text{setosa}] = 0.00
-$$
-$$
-\widehat{P}[\text{species} = \text{versicolor}] = 0.91
-$$
-$$
-\widehat{P}[\text{species} = \text{virginica}] = 0.09
-$$
+\widehat{Y} = \text{versicolor}
+$$   
+
 ::: 
 :::
 ::::
@@ -146,7 +140,7 @@ $$
 ## From CART to Survival Tree
 
 - Now we want to apply this idea to survival data
-- Recap: What is survival data?
+- Recap: Survival Data
 $$
 (T_i, \delta_i, \mathbf{x}_i)
 $$
@@ -164,45 +158,51 @@ $$
 
 ## From CART to Survival Tree
 
-- A first natural approach would be to fit a regression tree with the observed times $T_i$ as target variable
-- Why does this not work?
-- For survival data, the response is not fully observed due to censoring
-- The regession tree would handle the response as if the event occured at      $T_i$ which is not the case for censoring
-- Image we have for example: 
-    - $(T_1,\delta_1)=(100,1), \qquad (T_2,\delta_2)=(100,0)$ 
-    
-    - Then we have $T_1 = T_2 = 100$, but $T_1^\ast = 100,\; T_2^\ast > 100$.   
+- Natural Idea: use observed times $T_i$ as the response in a regression tree
+- **Why is this inappropriate for censored survival data?**
 
-$\Rightarrow$ Survival trees therefore require censoring-aware split criteria
-
-
+::: {.fragment}
+- Problem: Censoring means that the true event is not always observed
+$$
+(T_1, \delta_1) = (100, 1), \quad (T_2, \delta_2) = (100, 0)
+$$
+$$
+T_1 = T_2 = 100, \quad T_1^\ast = 100, T_2^\ast > 100
+$$
+- A regression tree would treat both observations, as they have occurred at the same time    
+$\Rightarrow$ Survival trees require censoring--aware splitting criteria
+:::
 
 
 ## Survival Trees: Log-rank Splitting
 
 - A split at node $h$ on a feature $x$ is always of the form $x \leq c$ and $x > c$
-- So as a result we get two new sets of data (child nodes).
-- A good split maximizes the differences of survival probabilities ($S(t)$) between the two sets
+- This partitions the observations into two child nodes
+- A good split seperates observations with different survival distributions
+
+::: {.fragment}
 - Notation:
-    - $t_1 < t_2 < ... < t_N$: distinct event times in parent node $h$
-    - $d_{j, g}$: number of events at time $j$ in child node $g \in \{1, 2\}$
+    - $t_1 < t_2 < ... < t_m$: distinct event times in parent node $h$
+    - $d_{j, g}$: number of events at time $t_j$ in child node $g \in \{1, 2\}$
     - $d_j = d_{j ,1} + d_{j, 2}$
     - $n_{j, g}$: number at risk immediately before $t_j$ in child node $g \in \{1, 2\}$
     - $n_j = n_{j, 1} + n_{j, 2}$
+    
+:::
 
     
 ## Survival Trees: Log-rank Splitting
-- Remember the log-rank statistic:
+- Remember the log-rank statistic [@ishwaran2007random]:
 $$
-L(x, c) = \frac{\sum_{j =1}^{N} \left(d_{j, 1} - n_{j ,1} \frac{d_j}{n_j}\right)}{\sqrt{\sum_{j=1}^{N} \frac{n_{j, 1}}{n_j} \left(1 - \frac{n_{j, 1}}{n_j}\right)
+L(x, c) = \frac{\sum_{j =1}^{m} \left(d_{j, 1} - n_{j ,1} \frac{d_j}{n_j}\right)}{\sqrt{\sum_{j=1}^{m} \frac{n_{j, 1}}{n_j} \left(1 - \frac{n_{j, 1}}{n_j}\right)
 \left(\frac{n_j - d_j}{n_j - 1}\right) d_j}}
 =
-\frac{\sum_{j = 1}^{N} (d_{j, 1} - E[d_{j, 1}])}{\sqrt{Var[d_{j, 1}]}}
+\frac{\sum_{j = 1}^{m} (d_{j, 1} - E[d_{j, 1}])}{\sqrt{ \sum_{j = 1}^{m}Var[d_{j, 1}]}}
 $$
 
 :::{.fragment}
-- High values of $|L(x, c)|$ provide evidene againt $H_0$: Both groups have equal survival functions
-- Hence, our goal is to maximize $|L(x, c)|$ $\Rightarrow$ we want to have a huge survival differnce between the resulting child nodes
+- Large values of $|L(x, c)|$ provide evidence against $H_0$: the two child nodes have the same survival function
+- Hence, our goal is to maximize $|L(x, c)|$
 - Formally find $x^\ast$ and $c^\ast$ such that
 $$
 |L(x^\ast, c^\ast)| \geq |L(x, c)| \quad \forall x, c
@@ -212,52 +212,40 @@ $$
 
 ## Example: Log-rank splitting
 
-- We take the **tumor** data from the $\{\textit{pammtools}\}$ package
-- We consider the two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
+- We use the `tumor` data from the $\{\textit{pammtools}\}$ package
+- We consider two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
 
 ::: {.fragment}
-![](results/logrank_splits_tumor.png){width=100%, length=100%}
+![](results/logrank_splits_tumor.png){width=100%}
 :::
 
 :::{.fragment}
-- Which split will we choose
+- **Which split will we choose?**
 :::
 
 
-
-
-
-
-
-
-    
-
-
-
-
-
-
 ## Survival Trees: Prediction Targets
-- Instead of predicting $t \mid \mathbf x$ we want to predict survival properties
-    1. Survival function with the Kaplan-Meier estimator [@kaplan1958nonparametric]
+- Instead of predicting a single event time, we predict survival-related functions conditional on $\mathbf x$
+    1. Survival function, estimated using the Kaplan-Meier estimator [@kaplan1958nonparametric]:
 $$
 \widehat{S}_h(t) = \prod_{j: t_{j, h} \leq t} \left(1 - \frac{d_{j, h}}{n_{j, h}}\right)
 $$
-    2. Cummulative Hazard function with the Nelson-Aalen estimator:
+    2. Cumulative hazard function, estimated using the Nelson-Aalen estimator:
 $$
 \widehat{H}_h(t) = \sum_{j: t_{j, h} \leq t} \frac{d_{j, h}}{n_{j, h}}
 $$
-
-- We assume that all observations in the terminal nodes have the same $\widehat{S}_h(t)/\widehat{H}_h(t)$
+- All observations that fall into the same terminal node receive the same estimated survival function and cumulative hazard function.
 
 ## Example: Survival Tree
-- We consider the **tumor** data with features, **age**, **sex**, and **transfusion**
+- We consider the `tumor` data with features, **age**, **complications**, and **transfusion**
+![](results/tree_tumor.png){width=95%}
+
 
 
 
 ## From Survival Trees to Random Survival Forests
 
-- A single survival tree is interpretable, but often unstable:
+- A single survival tree is often unstable:  
   small changes in the training data can lead to substantially different tree structures
 - This instability results in high variance and may reduce predictive performance
 
@@ -265,63 +253,56 @@ $$
 - **Random Survival Forests** [@ishwaran2008random] address this issue by combining many randomized survival trees
 - Randomization is introduced through:
   - bootstrap sampling of the training data for each tree
-  - random selection of candidate features at each split $mtry$)
+  - random selection of $mtry$ candidate features at each split 
 
-$$
-\text{Random Survival Forest} =
-\text{Bagging}
-+
-\text{Random Feature Selection}
-+
-\text{Survival Trees}
-$$
 :::
-
 
 ## Algorithm
-- Inputs:
-    - $\mathbb{D}_{\text{train}}$: Training-data with target $y$ and $P$ features
-    - $B:$ Number of Trees
-    - $mtry \leq P:$ Number of features that are considered at each split
-    - $d_0 \geq 0:$ Minimum number events in each node
-    
-::: {.fragment}
-1. Draw $B$ bootstrap samples from the data. Each sample contains around $67 \%$ of the data. The other $33\%$ are called out-of-bag-data (OOB-data)
-2. Grow a survival tree with each of the $B$ samples. At each split consider $mtry$ random features for your split. Grow the tree under the condition that each node must have $d_0 \geq 0$ events
-3. Calculate the Cumulative Hazard Function (CHF) for each tree. Then average over all $B$ CHFs to obtain the ensemble prediction
 
-:::
+- Inputs:
+    - $\mathcal{D}_{\text{train}}$: training data with survival outcomes and $p$ features
+    - $B:$ Number of Trees
+    - $mtry \leq p:$ Number of features that are considered at each split
+    - $d_0 \geq 0:$ Minimum number events in each terminal node
+    
+    
+## Algorithm
+
+1. Draw $B$ bootstrap samples from the data.  
+Each bootstrap sample contains $n$ observations with approximately $63.2\%$ unique observations.   
+The remaining approximately $36.8\%$ of observations are out-of-bag observations.
+2. Grow one survival tree from each bootstrap sample.   
+At each node, randomly select $mtry$ candidate predictors and choose the best split among them.   
+Grow the tree under the condition that each terminal node must have $d_0 \geq 0$ events.
+3. Aggregate the terminal-node survival predictions across all trees.
+
 
 
 ## Aggregation of Survival Predictions
-Now we want to make predictions with our tree ensemble:    
 
-- Imagine we have a new observation $\widetilde{x}$  
-- We push $\widetilde{x}$ down the $B$ trees    
-- For every tree we obtain a prediction for the Cumulative Hazard Function $H_{b}(t \mid  \widetilde{x})$
-- Then we average over all trees to obtain our ensemble prediction:
+- Consider a new observation $\tilde{x}$
+- We push $\tilde{x}$ down all $B$ trees
+- In each tree, $\tilde{x}$ reaches one terminal node and receives its
+terminal-node estimates
+
+::: {.fragment}
+**Ensemble Cumulative-Hazard-Function**
 $$
-\widehat{H} (t \mid \widetilde{x}) = \frac{1}{B} \sum_{b = 1}^{B} H_{b}(t \mid  \widetilde{x})
+\widehat{H}_{\mathrm{ens}}(t \mid \widetilde{x})
+=
+\frac{1}{B}
+\sum_{b=1}^{B}
+\widehat{H}_b(t \mid \widetilde{x})
 $$
-- To obtain the Survival function we can use the Breslow estimator:
-$$
-\widehat{S}(t \mid \widetilde{x}) = \exp(- \widehat{H} (t \mid \widetilde{x}))
-$$
 
-## OOB-data
-- Remember in each bootstrap sample we only used $67\%$ of the data to grow the survival tree
-- The remaining $33\%$ are the out-of-bag-data (OOB-data)
-
-
-
-
+:::
 
 
 ## Variable Importance
 
 - Random Survival Forests provide a prediction-based measure of variable
   importance based on OOB observations.
-- For a variable $x_p$, the Variable Importance (VIMP) is calculated as follows
+- For a feature $x_p$, the Variable Importance (VIMP) is calculated as follows
   [@ishwaran2008random]:
 
     1. Obtain the original OOB prediction error of the forest.
@@ -343,24 +324,21 @@ $$
 
 ## Variable Importance
 
-- Example: Consider the **tumor** data again
+- Example: Consider the `tumor` data again
 
 
 ![](results/feature_importance_rsf.png)
 
-- How can we interpret that?
+- **How should we interpret these importance values?**
 
 ## Evaluation: Concordance Index
 
-- Harrell's C-index measures the discriminatory ability of a survival model
-  [@harrell1982evaluating]
+- Harrell's C-index measures a survival model's ability to correctly rank individuals by predicted risk [@harrell1982evaluating]
 - It evaluates whether observations with earlier observed events have higher predicted risk
 
 ::: {.fragment}
 **Comparable Pairs**    
-For two observations $i$ and $j$ with $T_i$ < $T_j$, the pair is comparable if $\delta_i = 1$  
-- The earlier observation is an observed event  
-- If observation $i$ is censored before $T_j$, their event ordering is unknown    
+For two observations $i$ and $j$ with $T_i < T_j$ the pair is comparable if the earlier observation corresponds to an observed event, that is, if $\delta_i = 1$.   
 :::
 
 ::: {.fragment}
@@ -383,7 +361,7 @@ $$
 \frac{
 |\text{concordant pairs}|
 +
-0.5 \cdot | \text{risk ties} |
+0.5 \cdot | \text{tied pairs} |
 }{
 |\text{comparable pairs} |
 }.
@@ -407,8 +385,8 @@ $$
 
 **For Random Survival Forests:**  
 - Each patient receives a scalar risk score $\widehat r_i$  
-- A possible RSF risk score is the ensemble mortality derived from the
-  predicted cumulative hazard function  
+- One possible RSF risk score is the ensemble ensemble cumulative hazard function
+
 $$
 \widehat r_i \uparrow
 \quad \Rightarrow \quad
@@ -419,32 +397,52 @@ $$
 
 
 ## Brier-Score
-- The Brier-Score is a measure for probabilistic outcomes
+- The Brier score measures the accuracy of probabilistic predictions.
 - Let $\pi(t) \in [0, 1]$ the predicted probability at t and $c(t) \in \{0, 1\}$ the true value at t. Then the Brier-Score at time $t$ is given by:
 $$
 BS(t) = \frac{1}{N} \sum_{i = 1}^{N} [\pi_i(t) - c_i(t)]^2
 $$
 
 ::: {.fragment}
-- This ideas was extended by  @graf1999assessment, such that the Brier-Score can serve as a measure for survival problems with censored informations
-- For calculation we refer to @wang2019machine
+- @graf1999assessment extended this idea to survival outcomes subject to censoring
+- The Brier score measures the accuracy of predicted survival outcomes at time $t$
+:::
+
+## Brier Score for Censored Survival Data
+
+- Brier Score using inverse probability of censoring weights (IPCW) [@graf1999assessment]:
+
+$$
+\widehat{BS}(t) = 
+\frac{1}{N}
+\sum_{i=1}^{N}
+\left[
+\frac{
+\mathbb{I}(T_i\leq t,\delta_i=1)
+}{
+\widehat{G}(T_i)
+}
+\widehat{S}_i(t)^2
++
+\frac{
+\mathbb{I}(T_i>t)
+}{
+\widehat{G}(t)
+}
+\left(1-\widehat{S}_i(t)\right)^2
+\right],
+$$
+where $\widehat{G}(\tau) = \mathbb{P}[C_i > \tau]$ is the Kaplan-Meier estimator of the Censoring-Distribution using $(T_i, 1 - \delta_i)$
+
+::: {.fragment}
+- Event observed before $t$: compare prediction with survival status $0$
+- Observed beyond $t$: compare prediction with survival status $1$
+- Censored before $t$: no direct contribution because the status at $t$ is
+    unknown
+
 
 :::
 
-## Brier-Score Calculation
-- We reweight the individual contributions to the empirical Brier-Score to take censoring information into account
-- The, we can compute the Score as follows:
-$$
-BS(t) = \frac{1}{N} \sum_{i=1}^{N} w_i(t) [\widehat{S}_i(t) - Y_i(t)]^2,
-$$
-where $Y_i(t) = I [T_i^\ast > t]$ and
-$$
-w_i(t) = \begin{cases}
-\frac{\delta_i}{G(T_i)} & \text{ if} \quad T_i \leq t \\
-\frac{1}{G(T_i)} & \text{ if} \quad T_i > t
-\end{cases}
-$$
-- G is the Kaplan-Meier estimator of the censoring distribution for a dataset $(T_i, 1 - \delta_i, \mathbf x_i)$
 
 
 ## Benchmark: Setup
@@ -455,8 +453,8 @@ $$
 
 | Task | Data set |
 |---|---|---|
-| `Survival::gbsg` | Breast cancer patients |
-| `Pammtools::tumor` | Tumor registry patients |
+| `survival::gbsg` | Breast cancer patients |
+| `pammtools::tumor` | Tumor registry patients |
 
 ::: {.fragment}
 
@@ -464,9 +462,9 @@ $$
 
 | Learner | Role |
 | --- | --- |
-| Kaplan-Meier | Non-inforamtive baseline without covariates |
+| Kaplan-Meier | Non-informative baseline without covariates |
 | Cox regression | Classical statistical semi-parametric approach |
-| Random Survival Forest | Untuned ML method |
+| Random Survival Forest | ML method with default hyperparameters |
 | Tuned Random Survival Forest | ML method with optimized hyperparameters |
 :::
 
@@ -480,27 +478,108 @@ $$
 \texttt{nodesize} \in \{3,\ldots,50\}.
 $$
 
-- Inner resampling: 3-fold cross-validation
-- Outer evaluation: repeated 5-fold cross-validation with 3 repetitions
+- Inner resampling: 5-fold cross-validation
+- Outer resampling: repeated 5-fold cross-validation with 3 repetitions
 - Evaluation metrics:
   - C-index
-  - Integrated Brier Score
+  - Integrated Brier Score:
   
-## Benchmark: Results C-Index
+$$
+IBS = \frac{1}{t_{\max} - t_{\min}} \int_{t_{\min}}^{t_{\max}} \widehat{BS}(t) \, dt
+$$
+  
+## Benchmark: C-Index
 ![](results/benchmark_cindex.png){width = 100%}
 
 ## Benchmark: Integrated Brier Score
 ![](results/benchmark_graf.png){width = 100%}
 
+## Benchmark: Results
+
+- Results as tables:
+
+:::: {columns}
+
+::: {.column width = "50%"}
+```{r}
+bmr.res <- as.data.table(readRDS("results/benchmark_results.rds"))
+setnames(bmr.res,
+         old = c("task_id", "learner_id", "surv.cindex", "surv.graf"),
+         new = c("Task", "Learner", "C-Index", "IBS"))
+score.cols <- c("C-Index", "IBS")
+bmr.res[
+  , (score.cols) := lapply(.SD, round, digits = 3),
+  .SDcols = score.cols
+]
+
+gt(bmr.res[1:4]) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_body(columns = `C-Index`, rows = Learner == "Rsf.untuned"),
+      cells_body(columns = IBS, rows = Learner == "Rsf.untuned")
+    )
+  ) |>
+  tab_options(
+    table.font.size = px(18),
+    data_row.padding = px(5)
+  )
+```
+:::
 
 
+::: {.column width = "50%"}
+```{r}
+gt(bmr.res[5:8]) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_body(columns = `C-Index`, rows = Learner == "Coxph"),
+      cells_body(columns = IBS, rows = Learner %in% c("Coxph", "surv.rsf.tuned"))
+    )
+  ) |>
+  tab_options(
+    table.font.size = px(18),
+    data_row.padding = px(5)
+  )
+  
+```
+
+:::
+
+::::
+
+::: {.fragment}
+- On `gbsg`, the untuned RSF performs slightly better than Cox regression
+according to both metrics.
+- On `tumor`, Cox regression and the tuned RSF perform very similarly;
+Cox shows slightly better discrimination.
+- In these two tasks, tuning does not improve RSF performance.
+
+:::
 
 
 ## Conclusion
+**Advantages:**   
+
+- No proportional-hazards assumption and no predefined functional form
+- Automatically captures nonlinear effects and interactions
+- Provides flexible individual survival predictions
+- OOB-based variable importance [@ishwaran2008random]  
+
+::: {.fragment}
+
+**Limitations:**
+
+- Less directly interpretable than Cox regression
+- Higher computational cost, especially with hyperparameter tuning
+- Log-rank splitting may be less effective for strongly non-proportional survival patterns
+:::
 
 
-
-## Sources
+## Referneces
+::: {#refs}
+:::
 
 
 

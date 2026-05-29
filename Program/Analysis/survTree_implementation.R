@@ -183,7 +183,7 @@ survTree <- function(formula, data, minsize = 3) {
 survTree(
   formula = Surv(days, status) ~ age + transfusion + complications,
   data = tumor,
-  minsize = 10
+  minsize = 150
 )
 
 df <- MASS::Melanoma

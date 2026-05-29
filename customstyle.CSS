@@ -1,9 +1,248 @@
-/*-- scss:defaults --*/
-
-/*-- scss:rules --*/
+:root {
+  --surv-bg: #ffffff;
+  --surv-surface: #ffffff;
+  --surv-surface-strong: #ffffff;
+  --surv-ink: #172126;
+  --surv-muted: #617076;
+  --surv-teal: #0b7f83;
+  --surv-teal-dark: #075e62;
+  --surv-coral: #d85c4a;
+  --surv-gold: #d49a19;
+  --surv-line: #e2e8ea;
+  --surv-code-bg: #f7faf9;
+  --surv-shadow: 0 12px 28px rgba(23, 33, 38, 0.08);
+}
 
 .reveal {
-  font-size: 32px;
+  color: var(--surv-ink);
+  font-size: 28px;
+  letter-spacing: 0;
+  background: #ffffff;
+}
+
+.reveal-viewport,
+.reveal .backgrounds,
+.reveal .slide-background,
+.reveal .slide-background-content {
+  background: #ffffff !important;
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section:not(#title-slide):not(.visibility-hidden) {
+  box-sizing: border-box;
+  line-height: 1.24;
+  padding: 28px 46px 34px;
+}
+
+.reveal .slides section.stack {
+  padding: 0;
+}
+
+.reveal section:not(#title-slide):not(.visibility-hidden) h1,
+.reveal section:not(#title-slide):not(.visibility-hidden) h2,
+.reveal section:not(#title-slide):not(.visibility-hidden) h3 {
+  color: #000000;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.04;
+  text-transform: none;
+}
+
+.reveal section:not(#title-slide):not(.visibility-hidden) h1 {
+  font-size: 2.25em;
+}
+
+.reveal section:not(#title-slide):not(.visibility-hidden) h2 {
+  position: relative;
+  margin: 0 0 0.38em;
+  padding-bottom: 0.2em;
+  font-size: 1.26em;
+}
+
+.reveal section:not(#title-slide):not(.visibility-hidden) h2::after {
+  content: none;
+}
+
+.reveal section:not(#title-slide):not(.visibility-hidden) h3 {
+  font-size: 1.04em;
+}
+
+.reveal section:not(#title-slide):not(.visibility-hidden) p,
+.reveal section:not(#title-slide):not(.visibility-hidden) li {
+  color: var(--surv-ink);
+}
+
+.reveal strong {
+  color: #103b43;
+  font-weight: 760;
+}
+
+.reveal em {
+  color: var(--surv-teal-dark);
+}
+
+.reveal ul,
+.reveal ol {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+  margin-left: 1.05em;
+}
+
+.reveal li {
+  margin: 0.22em 0;
+  padding-left: 0.08em;
+}
+
+.reveal ul li::marker {
+  color: #000000;
+}
+
+.reveal ol li::marker {
+  color: #2f3437;
+  font-weight: 800;
+}
+
+.reveal blockquote {
+  width: 92%;
+  margin: 0.6em 0;
+  padding: 0.52em 0.78em;
+  color: #213238;
+  border-left: 6px solid var(--surv-gold);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.reveal a {
+  color: var(--surv-teal-dark);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.14em;
+}
+
+.reveal .columns {
+  gap: 0.85em;
+  align-items: center;
+}
+
+.reveal .column {
+  min-width: 0;
+}
+
+.reveal img,
+.reveal video,
+.reveal iframe {
+  border-radius: 8px;
+  max-height: 68vh;
+  object-fit: contain;
+}
+
+.reveal section > p > img:only-child,
+.reveal .column > p > img:only-child,
+.reveal .fragment > p > img:only-child {
+  display: block;
+  margin: 0.18em auto;
+  background: #ffffff;
+  border: 0;
+  box-shadow: none;
+}
+
+.reveal pre {
+  width: 100%;
+  margin: 0.32em 0;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(23, 33, 38, 0.08);
+}
+
+.reveal pre code {
+  max-height: 440px;
+  padding: 0.72em 0.9em;
+  color: #10272c;
+  background: var(--surv-code-bg);
+  border: 1px solid rgba(11, 127, 131, 0.15);
+  border-radius: 8px;
+  font-size: 0.62em;
+  line-height: 1.26;
+}
+
+.reveal code {
+  color: #075e62;
+  background: rgba(11, 127, 131, 0.09);
+  border-radius: 5px;
+  padding: 0.05em 0.24em;
+}
+
+.reveal table {
+  width: auto;
+  margin: 0.42em auto;
+  color: var(--surv-ink);
+  background: #ffffff;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--surv-line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(23, 33, 38, 0.06);
+}
+
+.reveal .gt_table,
+.reveal .gt_heading,
+.reveal .gt_col_headings,
+.reveal .gt_table_body,
+.reveal .gt_stub,
+.reveal .gt_stub_row_group,
+.reveal .gt_group_heading,
+.reveal .gt_row,
+.reveal .gt_summary_row,
+.reveal .gt_grand_summary_row,
+.reveal .gt_striped,
+.reveal .gt_stub.gt_row {
+  background-color: #ffffff !important;
+}
+
+.reveal .gt_table {
+  font-size: 0.82em !important;
+}
+
+.reveal th {
+  color: var(--surv-teal-dark);
+  background: #ffffff;
+  font-weight: 760;
+}
+
+.reveal td,
+.reveal th {
+  padding: 0.26em 0.46em;
+  border-bottom: 1px solid rgba(222, 215, 204, 0.78);
+  background: #ffffff;
+}
+
+.reveal tr:last-child td {
+  border-bottom: 0;
+}
+
+.reveal tr:nth-child(even) td {
+  background: #ffffff;
+}
+
+.reveal .fragment {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.reveal .fragment:not(.visible) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.reveal .slides section .fragment.semi-fade-out {
+  opacity: 1;
+  visibility: inherit;
+}
+
+.reveal .slides section .fragment.semi-fade-out.visible {
+  opacity: 0.25;
+  visibility: inherit;
 }
 
 .author {
@@ -11,103 +250,94 @@
 }
 
 .reveal .footer {
-  font-size: 0.25em !important;
-  text-align: left !important;
   display: block;
   position: fixed;
-  left: 50px;
-  right: 90px;
+  right: 96px;
+  bottom: 16px;
+  left: 54px;
+  color: var(--surv-muted);
+  font-size: 0.34em !important;
+  text-align: left !important;
 }
 
-.reveal .slides section .fragment.semi-fade-out {
-	opacity: 1;
-	visibility: inherit;
+.slide-number,
+.reveal.has-logo .slide-number {
+  right: 48px !important;
+  bottom: 18px !important;
+  top: unset !important;
+  color: var(--surv-muted) !important;
+  font-size: 0.45em !important;
+  background: #ffffff;
+  border: 1px solid rgba(97, 112, 118, 0.18);
+  border-radius: 999px;
+  padding: 0.22em 0.58em;
+}
 
-	&.visible {
-		opacity: 0.25;
-		visibility: inherit;
-	}
+.reveal .slide-logo {
+  width: 82px !important;
+  height: 82px !important;
+  max-width: unset !important;
+  max-height: unset !important;
+  top: 18px !important;
+  right: 48px !important;
+}
+
+.reveal .progress {
+  height: 5px;
+  color: var(--surv-teal);
+}
+
+.custom-smaller {
+  font-size: 0.9em;
+}
+
+.custom-smaller2 {
+  font-size: 0.75em;
+}
+
+.small-table table {
+  width: auto;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 0.65em;
+}
+
+.small-table th,
+.small-table td {
+  padding: 0.25em 0.5em;
+}
+
+.reveal .benchmark-tables table {
+  width: auto;
+  margin-right: auto;
+  margin-left: 0;
+  font-size: 0.7em;
 }
 
 .reveal .result {
   max-height: 100%;
 }
 
-// Slide numbers to the bottom-right
-.slide-number, .reveal.has-logo .slide-number {
-  bottom: 14px !important;
-  right: 50px !important;
-  top: unset !important;
-  color: #777777 !important;
-}
-
-.reveal .slide-logo {
-  height: 100px !important;
-  width: 100px!important;
-  max-width: unset !important;
-  max-height: unset !important;
-  top: 14px !important;
-  right: 50px !important;
-}
-
-.custom-smaller {
-    font-size: 0.9em;
-}
-
-.custom-smaller2 {
-    font-size: 0.75em;
-}
-
-.small-table table {
-  font-size: 0.65em;
-  width: auto;
-  margin-left: auto;
-  margin-right: auto;
-}
-.small-table th,
-.small-table td {
-  padding: 0.25em 0.5em;
-}
-
-/* Right-align both benchmark tables on the slide */
-.reveal .benchmark-tables table {
-  margin-left: 0;
-  margin-right: auto;
-}
-/* Optional: make the tables slightly more compact */
-.reveal .benchmark-tables table {
-  font-size: 0.85em;
-  width: auto;
-}
-/* LaTeX-style math rendering */
 .reveal mjx-container,
 .reveal .MathJax {
+  color: #13272d;
   font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", "Times New Roman", serif !important;
-  color: #111827;
 }
 
-/* Inline formulas like $x_i$ */
 .reveal mjx-container[jax="CHTML"]:not([display="true"]) {
-  font-size: 1.03em;
+  font-size: 1.02em;
 }
 
-/* Display equations like $$ ... $$ */
 .reveal mjx-container[display="true"] {
-  font-size: 1.18em;
-  margin: 0.75em 0 !important;
-  padding: 0.35em 0.55em;
+  margin: 0.3em 0 !important;
+  padding: 0.12em 0.24em;
   overflow-x: auto;
   overflow-y: hidden;
-}
-
-/* Optional: subtle equation block background */
-.reveal mjx-container[display="true"] > mjx-math {
-  padding: 0.15em 0.2em;
-}
-
-/* Better spacing inside slides */
-.reveal .slides section {
-  line-height: 1.35;
+  color: #10272c;
+  background: #ffffff;
+  border-left: 0;
+  border-radius: 6px;
+  font-size: 0.88em;
 }
 
 .reveal p mjx-container,
@@ -115,21 +345,10 @@
   vertical-align: -0.08em;
 }
 
-/* Display formulas */
-.reveal mjx-container[display="true"] {
-  font-size: 1.08em;
-  margin: 0.65em 0 !important;
-  padding: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* Do not distort MathJax tables, especially cases */
 .reveal mjx-mtable {
   line-height: normal !important;
 }
 
-/* Better spacing for cases/aligned equations */
 .reveal mjx-mtable mjx-mtr {
   height: auto !important;
 }
@@ -139,14 +358,89 @@
   padding-bottom: 0.12em !important;
 }
 
-/* Keep the cases brace visually balanced */
 .reveal mjx-mo {
   line-height: normal !important;
 }
 
-
-/* Avoid tiny equation numbers or cramped tags */
 .reveal mjx-mtd[id^="mjx-eqn"] {
+  color: var(--surv-muted);
   font-size: 0.85em;
-  color: #6b7280;
+}
+
+.reveal .slide-background-content {
+  background-size: cover;
+}
+
+body:has(#title-slide.present) .reveal,
+body:has(section.visibility-hidden.present) .reveal {
+  background: #ffffff;
+}
+
+.reveal section.visibility-hidden {
+  padding: 0 !important;
+}
+
+.reveal section.visibility-hidden h2::after {
+  content: none;
+}
+
+.reveal section.visibility-hidden p {
+  margin: 0;
+}
+
+.reveal section.visibility-hidden img {
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.reveal #title-slide {
+  padding: 0 !important;
+  text-align: center;
+}
+
+.reveal #title-slide h1,
+.reveal #title-slide h2,
+.reveal #title-slide h3,
+.reveal #title-slide p {
+  color: #000000;
+}
+
+body:has(#title-slide.present) .slide-number,
+body:has(#title-slide.present) .reveal.has-logo .slide-number,
+body:has(section.visibility-hidden.present) .slide-number,
+body:has(section.visibility-hidden.present) .reveal.has-logo .slide-number {
+  right: 50px !important;
+  bottom: 14px !important;
+  color: #777777 !important;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .reveal {
+    font-size: 25px;
+  }
+
+  .reveal .slides section {
+    padding: 28px 34px 38px;
+  }
+
+  .reveal h2 {
+    font-size: 1.32em;
+  }
+
+  .reveal .columns {
+    gap: 0.72em;
+  }
+
+  .slide-number,
+  .reveal.has-logo .slide-number {
+    right: 28px !important;
+    bottom: 12px !important;
+  }
 }

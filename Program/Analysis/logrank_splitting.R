@@ -33,12 +33,12 @@ for (feat in features) {
     km.fit,
     data = tumor,
     ggtheme = theme_bw(),
-    palette = c("blue", "red"),
+    palette = c("#E0A82E", "#124734"),
     legend.title = feat,
     xlab = "Time in days",
     pval = sprintf(
       "Log-rank statistic: %.2f",
-      logrank.test$chisq
+      sqrt(logrank.test$chisq)
     ),
     pval.coord = c(2000, 0.95),
     pval.size = 8,
@@ -90,13 +90,13 @@ for (sp in split.points) {
   km.plot <- ggsurvplot(
     km.fit,
     data = dt,
-    ggtheme = theme_bw(),
-    palette = c("blue", "red"),
+    ggtheme = surv.theme,
+    palette = surv.palette,
     legend.title = feat,
     xlab = "Time in days",
     pval = sprintf(
       "Log-rank statistic: %.2f",
-      logrank.test$chisq
+      sqrt(logrank.test$chisq)
     ),
     pval.coord = c(2000, 0.95),
     pval.size = 8,

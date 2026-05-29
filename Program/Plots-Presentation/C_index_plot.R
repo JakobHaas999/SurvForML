@@ -7,25 +7,30 @@ cindex.dt <- data.table(
   panel = factor(
     rep(c(
       "1. Concordant pair",
-      "2. Discordant pair"
+      "2. Discordant pair",
+      "3. Tied pair"
     ), each = 2),
     levels = c(
       "1. Concordant pair",
-      "2. Discordant pair"
+      "2. Discordant pair",
+      "3. Tied pair"
     )
   ),
-  individual = rep(c("Patient A", "Patient B"), 2),
+  individual = rep(c("Patient A", "Patient B"), 3),
   time = c(
+    2, 5,
     2, 5,
     2, 5
   ),
   status = c(
     1, 0,
-    1, 1
+    1, 1,
+    1, 0
   ),
   riskhat = c(
     0.8, 0.2,
-    0.2, 0.8
+    0.2, 0.8,
+    0.5, 0.5
   )
 )
 

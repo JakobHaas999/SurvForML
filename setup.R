@@ -23,7 +23,9 @@ packages <- c(
   "mlr3extralearners",
   "future",
   "progressr",
-  "mlr3viz"
+  "mlr3viz",
+  "checkmate",
+  "lgr"
 )
 
 # Function that checks if a package is installed and installs it if not
