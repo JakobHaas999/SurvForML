@@ -71,7 +71,7 @@ source("setup.R")
 
 ::: {.column width = "55%"}
 
-**How CART works**
+**How CART works** [@breiman1984classification]
 
 1.  Start with a root node that contains all the data
 
@@ -153,7 +153,7 @@ $$
 \begin{cases}
 1, & \text{if the event is observed,} \\
 0, & \text{if the observation is censored.}
-\end{cases}
+\end{cases}  
 $$
 
 ## From CART to Survival Tree
@@ -176,51 +176,85 @@ $\Rightarrow$ Survival trees require censoring--aware splitting criteria
 
 ## Survival Trees: Log-rank Splitting
 
-- A split at node $h$ on a feature $x$ is always of the form $x \leq c$ and $x > c$
-- This partitions the observations into two child nodes
-- A good split seperates observations with different survival distributions
+- A split at node $h$ on a feature $x$ has the form  
+$$
+x \leq c \quad \text{vs.} \quad x > c \quad \text{numerical feature}
+$$
+$$
+x \in A \quad \text{vs.} \quad x \notin A \quad \text{categorical feature }
+$$
+- In ordinary decision trees, splits are chosen such that the target values within each child node are as homogeneous as possible
 
-::: {.fragment}
+::: {.fragment} 
+- In survival trees, observations within a node should have similar survival behavior 
+- Therefore, splits are selected to separate groups with different survival distributions 
+ 
+$\Rightarrow$ Log-Rank Test [@mantel1966evaluation], which tests the null hypothesis for two groups $g \in \{1,2\}$:
+$$
+H_0: S_1(t) = S_2(t)
+$$
+:::
+
+
+## Survival Trees: Log-rank Splitting
+
 - Notation:
     - $t_1 < t_2 < ... < t_m$: distinct event times in parent node $h$
     - $d_{j, g}$: number of events at time $t_j$ in child node $g \in \{1, 2\}$
     - $d_j = d_{j ,1} + d_{j, 2}$
     - $n_{j, g}$: number at risk immediately before $t_j$ in child node $g \in \{1, 2\}$
     - $n_j = n_{j, 1} + n_{j, 2}$
-    
-:::
 
-    
-## Survival Trees: Log-rank Splitting
-- Remember the log-rank statistic [@ishwaran2007random]:
+::: {.fragment}
+- Log-rank statistic [@ishwaran2007random]:
 $$
 L(x, c) = \frac{\sum_{j =1}^{m} \left(d_{j, 1} - n_{j ,1} \frac{d_j}{n_j}\right)}{\sqrt{\sum_{j=1}^{m} \frac{n_{j, 1}}{n_j} \left(1 - \frac{n_{j, 1}}{n_j}\right)
 \left(\frac{n_j - d_j}{n_j - 1}\right) d_j}}
 =
 \frac{\sum_{j = 1}^{m} (d_{j, 1} - E[d_{j, 1}])}{\sqrt{ \sum_{j = 1}^{m}Var[d_{j, 1}]}}
-$$
+$$ 
 
-:::{.fragment}
+:::
+
+ 
+## Survival Trees: Log-rank Splitting
 - Large values of $|L(x, c)|$ provide evidence against $H_0$: the two child nodes have the same survival function
 - Hence, our goal is to maximize $|L(x, c)|$
 - Formally find $x^\ast$ and $c^\ast$ such that
 $$
 |L(x^\ast, c^\ast)| \geq |L(x, c)| \quad \forall x, c
 $$ 
+
+::: {.fragment}
+**Example**   
+
+- We use the `tumor` data from the $\{\textit{pammtools}\}$ packag
+- We consider two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
 :::
+
 
 
 ## Example: Log-rank splitting
 
-- We use the `tumor` data from the $\{\textit{pammtools}\}$ package
-- We consider two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
-
-::: {.fragment}
-![](results/logrank_splits_tumor.png){width=100%}
-:::
+![](results/logrank_splits_tumor.png)
 
 :::{.fragment}
-- **Which split will we choose?**
+
+- Since
+$$
+|L(\text{complications}, \text{no})|
+>
+|L(\text{transfusion}, \text{no})|
+$$
+
+we split the observations into two groups:
+
+$$
+\text{no complications}
+\quad \text{vs.} \quad
+\text{complications}
+$$
+
 :::
 
 
@@ -263,17 +297,20 @@ $$
     - $\mathcal{D}_{\text{train}}$: training data with survival outcomes and $p$ features
     - $B:$ Number of Trees
     - $mtry \leq p:$ Number of features that are considered at each split
-    - $d_0 \geq 0:$ Minimum number events in each terminal node
+    - $d_0 \geq 0:$ Minimum number of events in each terminal node
+
+$\Rightarrow$ $B$, $mtry$ and $d_0$ are Hyperparameters
     
     
 ## Algorithm
 
+-  We follow the Random Survival Forest algorithm of @ishwaran2008random.
 1. Draw $B$ bootstrap samples from the data.  
 Each bootstrap sample contains $n$ observations with approximately $63.2\%$ unique observations.   
 The remaining approximately $36.8\%$ of observations are out-of-bag observations.
 2. Grow one survival tree from each bootstrap sample.   
 At each node, randomly select $mtry$ candidate predictors and choose the best split among them.   
-Grow the tree under the condition that each terminal node must have $d_0 \geq 0$ events.
+Grow the tree under the condition that each terminal node must have at least $d_0$ events.
 3. Aggregate the terminal-node survival predictions across all trees.
 
 
@@ -345,6 +382,7 @@ For two observations $i$ and $j$ with $T_i < T_j$ the pair is comparable if the 
 **Which pairs are comparable?**
 ![](results/graph_c_index.png)
 
+*Illustration adapted from [@wang2019machine].*
 :::
 
 ## Concordance Index: Intuition

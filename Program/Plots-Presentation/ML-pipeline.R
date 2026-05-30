@@ -30,7 +30,7 @@ digraph pipeline {
   D     [label = 'Data']
   Train [label = 'Training Data']
   Test  [label = 'Test Data']
-  Model [label = 'Model']
+  Model [label = 'Learner/Model']
   Pred  [label = 'Predictions']
   Eval  [label = 'Evaluation']
   D -> Train

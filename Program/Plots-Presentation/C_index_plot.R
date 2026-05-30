@@ -95,7 +95,7 @@ ggsave(
 ## Graphical plot of permissible pairs for c index
 
 # Save as png
-png("results/graph_c_index.png", width = 1000, height = 300)
+png("results/graph_c_index.png", width = 1000, height = 200)
 par(mar = c(0, 0, 0, 0))
 # Coordinates of the five vertexes
 x <- 1:5
