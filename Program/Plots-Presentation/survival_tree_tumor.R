@@ -29,11 +29,11 @@ tree.tumor <- ctree(
 )
 
 ## Plot and save the tree
-png(
-  filename = "results/tree_tumor.png",
-  width = 2600,
-  height = 1500,
-  res = 250
-)
+# png(
+#   filename = "results/tree_tumor.png",
+#   width = 2600,
+#   height = 1500,
+#   res = 250
+# )
 plot(tree.tumor, tp_args = list(FUN = node_surv))
 dev.off()

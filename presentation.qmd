@@ -228,7 +228,7 @@ $$
 ::: {.fragment}
 **Example**   
 
-- We use the `tumor` data from the $\{\textit{pammtools}\}$ packag
+- We use the `tumor` data from the $\{\textit{pammtools}\}$ package
 - We consider two binary features **complications** $\in \{0, 1\}$ and **transfusion** $\in \{0, 1\}$
 :::
 
@@ -423,14 +423,11 @@ $$
 
 **For Random Survival Forests:**  
 - Each patient receives a scalar risk score $\widehat r_i$  
-- One possible RSF risk score is the ensemble ensemble cumulative hazard function
-
+- A common choice is the ensemble mortality, which is derived from the ensemble cumulative hazard function [@ishwaran2008random]:
 $$
-\widehat r_i \uparrow
-\quad \Rightarrow \quad
-\text{higher predicted event risk}
+\widehat M_{ens} (\mathbf x_i) = \sum_{j=1}^m \widehat H_{ens} (t_j \mid \mathbf x_i)
 $$
-
+$\Rightarrow$ Higher values correspond to higher predicted risk 
 :::
 
 
@@ -527,10 +524,10 @@ IBS = \frac{1}{t_{\max} - t_{\min}} \int_{t_{\min}}^{t_{\max}} \widehat{BS}(t) \
 $$
   
 ## Benchmark: C-Index
-![](results/benchmark_cindex.png){width = 100%}
+![](results/benchmark_cindex.png)
 
 ## Benchmark: Integrated Brier Score
-![](results/benchmark_graf.png){width = 100%}
+![](results/benchmark_graf.png)
 
 ## Benchmark: Results
 

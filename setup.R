@@ -26,7 +26,9 @@ packages <- c(
   "mlr3viz",
   "checkmate",
   "lgr",
-  "partykit"
+  "partykit",
+  "knitr",
+  "kableExtra"
 )
 
 # Function that checks if a package is installed and installs it if not
