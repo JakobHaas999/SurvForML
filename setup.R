@@ -16,9 +16,9 @@ packages <- c(
   "DiagrammeR",
   "DiagrammeRsvg",
   "rsvg",
+  "pammtools",
   "mlr3proba",
   "mlr3tuning",
-  "randomForestSRC",
   "paradox",
   "mlr3extralearners",
   "future",
@@ -30,6 +30,8 @@ packages <- c(
   "knitr",
   "kableExtra"
 )
+
+packages <- unique(packages)
 
 # Function that checks if a package is installed and installs it if not
 # Input:

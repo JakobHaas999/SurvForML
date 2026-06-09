@@ -9,6 +9,8 @@ head(tumor)
 # Select relevant columns
 tumor <- tumor[, .(days, status, complications, transfusion, age)]
 
+surv.theme <- theme_bw()
+surv.palette <- c("#E0A82E", "#124734")
 
 ### Part 1: Only binary features
 # Calculate log-rank test statistic for every feature
@@ -32,8 +34,8 @@ for (feat in features) {
   km.plot <- ggsurvplot(
     km.fit,
     data = tumor,
-    ggtheme = theme_bw(),
-    palette = c("#E0A82E", "#124734"),
+    ggtheme = surv.theme,
+    palette = surv.palette,
     legend.title = feat,
     xlab = "Time in days",
     pval = sprintf(
@@ -92,7 +94,7 @@ for (sp in split.points) {
     data = dt,
     ggtheme = surv.theme,
     palette = surv.palette,
-    legend.title = feat,
+    legend.title = sprintf("age < %.1f", sp),
     xlab = "Time in days",
     pval = sprintf(
       "Log-rank statistic: %.2f",

@@ -86,7 +86,8 @@ bmr.grd <- benchmark_grid(
 ## Run Benchmark
 set.seed(1645)
 lgr::get_logger("mlr3")$set_threshold("warn")
-future::plan(future::multisession, workers = 7)
+workers <- max(1L, future::availableCores() - 1L)
+future::plan(future::multisession, workers = workers)
 bmr <- tryCatch(
   {
     with_progress(
@@ -97,6 +98,7 @@ bmr <- tryCatch(
     future::plan(future::sequential)
   }
 )
+rm(workers)
 
 
 ## Define measures
