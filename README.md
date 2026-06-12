@@ -123,10 +123,3 @@ Evaluation uses:
 
 - Concordance index
 - Graf score
-
-## Notes
-
-This repository is mainly educational. The custom `survTree()` implementation is
-intended to make the construction of survival trees transparent; for production
-analysis, prefer maintained packages such as `partykit`, `randomForestSRC` or
-the `mlr3proba` ecosystem.

@@ -15,7 +15,7 @@ kable(
   kable_styling(latex_options = c("hold_position", "scale_down"))
 
 ## Head of gbsg data as latex tibble
-gbsg <- as.data.table(survival::gbsg)
+gbsg <- data.table::as.data.table(survival::gbsg)
 cols <- c("rfstime", "status", setdiff(names(gbsg), c("rfstime", "status")))
 
 gbsg <- gbsg[, ..cols]
@@ -39,5 +39,18 @@ kable(
   digits = 3,
   caption = "Summary of tasks",
   label = "task-summ"
+) |>
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+# New observation tumor data
+tumor <- data.table::as.data.table(tumor)
+tumor.subset <- tumor[, .(complications, transfusion, age)]
+set.seed(67)
+new.obs <- tumor.subset[sample(.N, 1)]
+kable(
+  new.obs,
+  format = "latex",
+  booktabs = TRUE,
+  digits = 3
 ) |>
   kable_styling(latex_options = c("hold_position", "scale_down"))
