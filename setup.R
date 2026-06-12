@@ -26,6 +26,7 @@ packages <- c(
   "mlr3viz",
   "checkmate",
   "lgr",
+  "pec",
   "partykit",
   "knitr",
   "kableExtra"
