@@ -54,14 +54,6 @@ Install and load the R dependencies with:
 source("setup.R")
 ```
 
-For reproducible package versions, consider initializing `renv` after the setup
-works locally:
-
-```r
-install.packages("renv")
-renv::init()
-renv::snapshot()
-```
 
 ## Reproducing the Main Outputs
 
@@ -138,9 +130,4 @@ The examples use built-in or package-provided data sets:
 - `pammtools::tumor` for survival-tree and Random Survival Forest examples
 - `gbsg` from the `mlr3proba` survival task collection for benchmarking
 
-## Notes
 
-The scripts are designed for teaching and presentation purposes. For a fully
-reproducible research workflow, the next useful step is to add an `renv.lock`
-file after confirming that all scripts run successfully in the intended R
-environment.
