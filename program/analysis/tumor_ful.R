@@ -154,8 +154,12 @@ brier.forest <- pec(
 
 png(
   filename = "results/brier_base_forest.png",
-  width = 1000,
-  height = 700
+  width = 800,
+  height = 500
+)
+par(
+  cex.lab = 1.5,
+  cex.axis = 1.3
 )
 plot(
   brier.forest,
@@ -171,6 +175,7 @@ legend(
   legend = c("Reference", "Random Survival Forest"),
   col = c("gray40", "red"),
   lwd = 2,
-  bty = "n"
+  bty = "n",
+  c = 1.4
 )
 dev.off()
