@@ -11,10 +11,10 @@ tumor <- tumor[, .(days, status, complications, transfusion, age)]
 
 surv.theme <- theme_bw() +
   theme(
-    axis.title = element_text(size = 16),
-    axis.text = element_text(size = 13),
-    legend.title = element_text(size = 14),
-    legend.text = element_text(size = 12),
+    axis.title = element_text(size = 21),
+    axis.text = element_text(size = 18),
+    legend.title = element_text(size = 21),
+    legend.text = element_text(size = 18),
     legend.position = "bottom",
     plot.margin = margin(5, 5, 5, 5)
   )
@@ -40,7 +40,6 @@ for (feat in features) {
   )
 
   km.plot <- ggsurvplot(
-
     km.fit,
     data = tumor,
     ggtheme = surv.theme,
@@ -53,7 +52,7 @@ for (feat in features) {
       sqrt(logrank.test$chisq)
     ),
     pval.coord = c(1400, 0.95),
-    pval.size = 5.5,
+    pval.size = 8.5,
     conf.int = TRUE
   )
   log.rank.binary[[feat]] <- list(logrank = logrank.test$chisq, plot = km.plot)

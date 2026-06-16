@@ -47,12 +47,12 @@ cindex.plot <- ggplot(cindex.dt) +
   ) +
   geom_point(
     aes(x = time, y = y, shape = endpoint),
-    size = 3.5
+    size = 4.5
   ) +
   geom_text(
     aes(x = 0.15, y = y + 0.08, label = risklabel),
     hjust = 0,
-    size = 3.4
+    size = 5
   ) +
   facet_wrap(~panel, nrow = 1) +
   scale_shape_manual(
@@ -67,23 +67,26 @@ cindex.plot <- ggplot(cindex.dt) +
     limits = c(0, 6)
   ) +
   labs(
-    x = "Observed follow-up time",
+    x = "Observed time-to-event",
     y = NULL,
     shape = NULL
   ) +
-  theme_bw(base_size = 12) +
+  theme_bw(base_size = 16) +
   theme(
     legend.position = "bottom",
-    strip.text = element_text(face = "bold"),
-    panel.grid.minor = element_blank(),
-    axis.text.y = element_text(face = "bold")
+    legend.text = element_text(size = 16),
+    strip.text = element_text(size = 16, face = "bold"),
+    axis.title.x = element_text(size = 18),
+    axis.text.x = element_text(size = 16),
+    axis.text.y = element_text(size = 16, face = "bold"),
+    panel.grid.minor = element_blank()
   )
 
 cindex.plot
 
 ## Save plot
 ggsave(
-  filename = "c_index_plot.svg",
+  filename = "c_index_plot.png",
   plot = cindex.plot,
   path = "results",
   width = 10,
